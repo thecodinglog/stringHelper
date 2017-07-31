@@ -162,7 +162,7 @@ public class StringHelper {
                                 break;
                             }
 
-                        } else {
+                        } else if(beginPosition == accByte - 1) {
                             if(length > 1){
                                 startIndex = i + 1;
                             }
@@ -190,9 +190,9 @@ public class StringHelper {
             accSubstrLength++;
         }
 
-        if (startIndex == -1 && accSubstrLength > 0) {
+/*        if (startIndex == -1 && accSubstrLength > 0) {
             return new String(stringBuilder);
-        }
+        }*/
 
         if (byteLength == null) {
             stringBuilder.append(str.substring(startIndex));
@@ -200,7 +200,7 @@ public class StringHelper {
         }
 
 
-        for (int i = startIndex; i < str.length(); i++) {
+        for (int i = startIndex; i < str.length() && startIndex >= 0; i++) {
             accSubstrLength = accSubstrLength + getByteLengthOfChar(str.charAt(i));
             if (accSubstrLength == length) {
                 stringBuilder.append(str.charAt(i));
@@ -216,7 +216,7 @@ public class StringHelper {
         }
 
         if (leftPadding != null) {
-            int diffLength = length - accSubstrLength;
+            int diffLength = byteLength.intValue() - accSubstrLength;
             StringBuilder padding = new StringBuilder();
             for (int i = 0; i < diffLength; i++) {
                 padding.append(leftPadding);
@@ -225,7 +225,7 @@ public class StringHelper {
         }
 
         if (rightPadding != null) {
-            int diffLength = length - accSubstrLength;
+            int diffLength = byteLength.intValue() - accSubstrLength;
             StringBuilder padding = new StringBuilder();
             for (int i = 0; i < diffLength; i++) {
                 padding.append(rightPadding);

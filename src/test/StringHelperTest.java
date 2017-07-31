@@ -18,11 +18,22 @@ public class StringHelperTest {
         String data1 = "a好호b";
         String data2 = "好호ab";
         String data3 = "ab好호";
-        String data4 = "好호ab";
 
         Assert.assertThat(StringHelper.substrb2(data1, 1, 10, null, "|"), is("a好호b||||"));
         Assert.assertThat(StringHelper.substrb2(data1, 3, 10, null, "|"), is(" 호b||||||"));
         Assert.assertThat(StringHelper.substrb2(data1, 3, 10, "|", null), is("|||||| 호b"));
+
+        Assert.assertThat(StringHelper.substrb2(data2, 1, 10, "|", null), is("||||好호ab"));
+        Assert.assertThat(StringHelper.substrb2(data2, 2, 10, "|", null), is("||||| 호ab"));
+        Assert.assertThat(StringHelper.substrb2(data2, 5, 10, "|", null), is("||||||||ab"));
+        Assert.assertThat(StringHelper.substrb2(data2, 6, 10, "|", null), is("|||||||||b"));
+
+        Assert.assertThat(StringHelper.substrb2(data2, -5, 10, "|", null), is("||||| 호ab"));
+        Assert.assertThat(StringHelper.substrb2(data3, -1, 10, "|", null), is("||||||||| "));
+        Assert.assertThat(StringHelper.substrb2(data3, -2, 10, "|", null), is("||||||||호"));
+        Assert.assertThat(StringHelper.substrb2(data2, -5, 10, null, "|"), is(" 호ab|||||"));
+        Assert.assertThat(StringHelper.substrb2(data3, -1, 10, null, "|"), is(" |||||||||"));
+        Assert.assertThat(StringHelper.substrb2(data3, -2, 10, null, "|"), is("호||||||||"));
     }
 
     @Test(expected = IllegalArgumentException.class)
