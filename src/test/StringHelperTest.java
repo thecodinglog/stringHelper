@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class StringHelperTest {
     String testDataString = "abcde한글이han gul다ykd";
 
+
     @Test
     public void padding() {
         String data1 = "a好호b";
@@ -25,13 +26,18 @@ public class StringHelperTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void exceptionalSituation() {
+    public void inputStringCheck() {
         StringHelper.substrb2(null, 0, 0);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void IndexOutOfBounds() {
         StringHelper.substrb2("a", 2, 2);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void illegalArgument(){
+        StringHelper.substrb2("ddd",1, 3,"a","b");
     }
 
     /**
@@ -50,6 +56,19 @@ public class StringHelperTest {
      */
     @Test
     public void ifPositionIsPositive() {
+        Assert.assertThat(StringHelper.substrb2("ab한글", 4, 2), is("  "));
+        Assert.assertThat(StringHelper.substrb2("ab한글", 5, 2), is("글"));
+        Assert.assertThat(StringHelper.substrb2("ab한글", 6, 2), is(" "));
+        Assert.assertThat(StringHelper.substrb2("ab한글", 6, 2), is(" "));
+
+        Assert.assertThat(StringHelper.substrb2("한글ab", 0, 1), is(" "));
+        Assert.assertThat(StringHelper.substrb2("한글ab", 1, 1), is(" "));
+        Assert.assertThat(StringHelper.substrb2("한글ab", 1, 2), is("한"));
+        Assert.assertThat(StringHelper.substrb2("한글ab", 2, 1), is(" "));
+        Assert.assertThat(StringHelper.substrb2("한글ab", 2, 2), is("  "));
+        Assert.assertThat(StringHelper.substrb2("한글ab", 2, 3), is(" 글"));
+
+
 
         Assert.assertThat(StringHelper.substrb2(testDataString, 2, 2), is("bc"));
         Assert.assertThat(StringHelper.substrb2(testDataString, 5, 1), is("e"));
@@ -97,6 +116,29 @@ public class StringHelperTest {
     @Test
     public void ifPositionIsNegative() {
         Assert.assertThat(StringHelper.substrb2(testDataString, -1, 1), is("d"));
+
+        Assert.assertThat(StringHelper.substrb2("a한b글", -1, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("a한b글", -2, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한글", -1, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한글", -2, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -2, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -3, 1), is("a" ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -4, 1), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -5, 1), is(" " ));
+
+        Assert.assertThat(StringHelper.substrb2("한a글", -1, 2), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -2, 2), is("글" ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -3, 2), is("a " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -4, 2), is(" a" ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -5, 2), is("한" ));
+
+        Assert.assertThat(StringHelper.substrb2("한a글", -1, 3), is(" " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -2, 3), is("글" ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -3, 3), is("a글" ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -4, 3), is(" a " ));
+        Assert.assertThat(StringHelper.substrb2("한a글", -5, 3), is("한a" ));
+
+
         Assert.assertThat(StringHelper.substrb2(testDataString, -3, 3), is("ykd"));
 
         Assert.assertThat(StringHelper.substrb2(testDataString, -4, 3), is(" yk"));
@@ -119,7 +161,7 @@ public class StringHelperTest {
         Assert.assertThat(StringHelper.substrb2(testDataString, 2.8, -1), IsNull.nullValue());
     }
 
-    //String testDataString = "abcde한글이hangul다ykd";
+    //String testDataString = "abcde한글이han gul다ykd";
 
     /**
      * 길이가 생략된 경우 시작위치에서 끝까지 모든 문자를 리턴한다.
