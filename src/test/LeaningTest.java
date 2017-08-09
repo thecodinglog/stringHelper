@@ -3,6 +3,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -12,6 +15,23 @@ import java.util.regex.Pattern;
  */
 public class LeaningTest {
     String testDataString = "abcde한글이han gul다ykd";
+
+    @Test
+    public void getDefaultCharsets() throws UnsupportedEncodingException, CharacterCodingException {
+        Charset charset = Charset.forName("EUC-KR");
+
+        ByteBuffer byteBuffer = charset.encode(testDataString);
+
+        byte[] newone = Arrays.copyOfRange(byteBuffer.array(), 4,10);
+
+        CharsetDecoder charsetDecoder = charset.newDecoder();
+        charsetDecoder.replaceWith("*");
+        charsetDecoder.onMalformedInput(CodingErrorAction.REPLACE).onUnmappableCharacter(CodingErrorAction.REPLACE);
+        CharBuffer charBuffer = charsetDecoder.decode(ByteBuffer.wrap(newone));
+
+
+
+    }
 
     @Test
     public void charRepeating() {
