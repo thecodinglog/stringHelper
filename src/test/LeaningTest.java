@@ -18,17 +18,21 @@ public class LeaningTest {
 
     @Test
     public void getDefaultCharsets() throws UnsupportedEncodingException, CharacterCodingException {
+        String testData = "한글이가득";
+
         Charset charset = Charset.forName("EUC-KR");
+        ByteBuffer byteBuffer = charset.encode(testData);
 
-        ByteBuffer byteBuffer = charset.encode(testDataString);
+        byte[] newone = Arrays.copyOfRange(byteBuffer.array(), 1, 5);
 
-        byte[] newone = Arrays.copyOfRange(byteBuffer.array(), 4,10);
+        CharsetDecoder charsetDecoder = charset.newDecoder()
+                .replaceWith("*")
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE);
 
-        CharsetDecoder charsetDecoder = charset.newDecoder();
-        charsetDecoder.replaceWith("*");
-        charsetDecoder.onMalformedInput(CodingErrorAction.REPLACE).onUnmappableCharacter(CodingErrorAction.REPLACE);
         CharBuffer charBuffer = charsetDecoder.decode(ByteBuffer.wrap(newone));
 
+        System.out.println(charBuffer.toString());
 
 
     }

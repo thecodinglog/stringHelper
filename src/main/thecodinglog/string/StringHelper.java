@@ -1,5 +1,13 @@
 package thecodinglog.string;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.util.Arrays;
+
 public class StringHelper {
 
     public static String substrb2(String str, Number beginByte) {
@@ -20,7 +28,7 @@ public class StringHelper {
      * beginByte가 0보다 작으면 문자열 오른쪽에서 왼쪽으로 위치를 검색합니다.
      * beginByte 또는 byteLength가 실수이면 소수점은 버립니다.
      * 길이를 명시하지 않은 경우 시작위치에서 오른쪽 끝 문자열까지 모두를 반환합니다.
-     *
+     * <p>
      * Returns the substring of the String.
      * It returns a string as specified length and byte position.
      * You can pad characters left or right when there is a specified length.
@@ -28,12 +36,12 @@ public class StringHelper {
      * If the start position or the specified length causes a 2-byte character to be truncated in the middle,
      * it will be converted to Space.
      * You can specify either left or right padding.
-     *
+     * <p>
      * If beginByte is 0, it is changed to 1 and processed.
      * If beginByte is less than 0, the string is searched for from right to left.
      * If beginByte or byteLength is a real number, the decimal point is discarded.
      * If you do not specify a length, returns everything from the starting position to the right-end string.
-     *
+     * <p>
      * Examples:
      * <blockquote><pre>
      *     StringHelper.substrb2("a好호b", 1, 10, null, "|") returns "a好호b||||"
@@ -42,14 +50,42 @@ public class StringHelper {
      *     StringHelper.substrb2("abcde한글이han gul다ykd", 7) returns " 글이han gul다ykd"
      * </pre></blockquote>
      *
-     * @param str a string to substring
-     * @param beginByte the beginning byte
-     * @param byteLength length of bytes
-     * @param leftPadding a character for padding. It must be 1 byte character.
+     * @param str          a string to substring
+     * @param beginByte    the beginning byte
+     * @param byteLength   length of bytes
+     * @param leftPadding  a character for padding. It must be 1 byte character.
      * @param rightPadding a character for padding. It must be 1 byte character.
      * @return a substring
      */
     public static String substrb2(String str, Number beginByte, Number byteLength, String leftPadding, String rightPadding) {
+        validateInput(str, leftPadding, rightPadding);
+        int beginByteInt = (int) beginByte;
+        int byteLengthInt = (int) byteLength;
+
+        int fromIndex = beginByteInt == 0 ? 0 : beginByteInt - 1;
+        int toIndex = beginByteInt + byteLengthInt;
+
+        Charset charset = Charset.forName("EUC-KR");
+
+        ByteBuffer byteBuffer = charset.encode(str);
+
+        byte[] newone = Arrays.copyOfRange(byteBuffer.array(), fromIndex, toIndex);
+
+        CharsetDecoder charsetDecoder = charset.newDecoder()
+                .replaceWith("*")
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE);
+
+        CharBuffer charBuffer = null;
+        try {
+            charBuffer = charsetDecoder.decode(ByteBuffer.wrap(newone));
+        } catch (CharacterCodingException e) {
+            e.printStackTrace();
+        }
+        return charBuffer.toString();
+    }
+
+    private static void validateInput(String str, String leftPadding, String rightPadding) {
         if (str == null || str.equals("")) {
             throw new IllegalArgumentException("The source string can not be an empty string or null.");
         }
@@ -75,166 +111,6 @@ public class StringHelper {
                 throw new IllegalArgumentException("The padding string must be 1 Byte character.");
             }
         }
-
-        int beginPosition = beginByte.intValue();
-        if (beginPosition == 0) beginPosition = 1;
-
-        int length;
-        if (byteLength != null) {
-            length = byteLength.intValue();
-            if (length < 0) {
-                return null;
-            }
-        } else {
-            length = -1;
-        }
-
-        if (length == 0)
-            return null;
-
-        boolean beginHalf = false;
-        int accByte = 0;
-        int startIndex = -1;
-
-        if (beginPosition >= 0) {
-            for (int i = 0; i < str.length(); i++) {
-                if (beginPosition - 1 == accByte) {
-                    startIndex = i;
-                    accByte = accByte + getByteLengthOfChar(str.charAt(i));
-                    break;
-                } else if (beginPosition == accByte) {
-                    beginHalf = true;
-                    startIndex = i;
-                    accByte = accByte + getByteLengthOfChar(str.charAt(i));
-                    break;
-                } else if (accByte + 2 == beginPosition && i == str.length() - 1) {
-                    beginHalf = true;
-                    accByte = accByte + getByteLengthOfChar(str.charAt(i));
-                    break;
-                }
-                accByte = accByte + getByteLengthOfChar(str.charAt(i));
-            }
-        } else {
-            beginPosition = beginPosition * -1;
-            if(length > beginPosition){
-                length = beginPosition;
-            }
-
-            for (int i = str.length() - 1; i >= 0; i--) {
-
-                accByte = accByte + getByteLengthOfChar(str.charAt(i));
-
-                if (i == str.length() - 1) {
-                    if (getByteLengthOfChar(str.charAt(i)) == 1) {
-                        if (beginPosition == accByte) {
-                            startIndex = i;
-                            break;
-                        }
-                    } else {
-                        if (beginPosition == accByte) {
-                            if (length > 1) {
-                                startIndex = i;
-                                break;
-                            } else {
-                                beginHalf = true;
-                                break;
-                            }
-                        }else if(beginPosition == accByte - 1){
-                            if(length == 1){
-                                beginHalf = true;
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    if (getByteLengthOfChar(str.charAt(i)) == 1) {
-                        if (beginPosition == accByte) {
-                            startIndex = i;
-                            break;
-                        }
-                    } else {
-                        if (beginPosition == accByte) {
-                            if (length > 1) {
-                                startIndex = i;
-                                break;
-                            } else {
-                                beginHalf = true;
-                                break;
-                            }
-
-                        } else if(beginPosition == accByte - 1) {
-                            if(length > 1){
-                                startIndex = i + 1;
-                            }
-                            beginHalf = true;
-                            break;
-
-                        }
-                    }
-
-                }
-            }
-        }
-
-
-        if (accByte < beginPosition) {
-            throw new IndexOutOfBoundsException("The start position is larger than the length of the original string.");
-        }
-
-
-        StringBuilder stringBuilder = new StringBuilder();
-        int accSubstrLength = 0;
-
-        if (beginHalf) {
-            stringBuilder.append(" ");
-            accSubstrLength++;
-        }
-
-/*        if (startIndex == -1 && accSubstrLength > 0) {
-            return new String(stringBuilder);
-        }*/
-
-        if (byteLength == null) {
-            stringBuilder.append(str.substring(startIndex));
-            return new String(stringBuilder);
-        }
-
-
-        for (int i = startIndex; i < str.length() && startIndex >= 0; i++) {
-            accSubstrLength = accSubstrLength + getByteLengthOfChar(str.charAt(i));
-            if (accSubstrLength == length) {
-                stringBuilder.append(str.charAt(i));
-                break;
-            } else if (accSubstrLength - 1 == length) {
-                    stringBuilder.append(" ");
-                break;
-            } else if (accSubstrLength - 1 > length) {
-
-                break;
-            }
-            stringBuilder.append(str.charAt(i));
-        }
-
-        if (leftPadding != null) {
-            int diffLength = byteLength.intValue() - accSubstrLength;
-            StringBuilder padding = new StringBuilder();
-            for (int i = 0; i < diffLength; i++) {
-                padding.append(leftPadding);
-            }
-            stringBuilder.insert(0, padding);
-        }
-
-        if (rightPadding != null) {
-            int diffLength = byteLength.intValue() - accSubstrLength;
-            StringBuilder padding = new StringBuilder();
-            for (int i = 0; i < diffLength; i++) {
-                padding.append(rightPadding);
-            }
-            stringBuilder.append(padding);
-        }
-
-
-        return new String(stringBuilder);
     }
 
     private static int getByteLengthOfChar(char c) {

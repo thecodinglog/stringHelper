@@ -12,6 +12,11 @@ import static org.hamcrest.CoreMatchers.is;
 public class StringHelperTest {
     String testDataString = "abcde한글이han gul다ykd";
 
+    @Test
+    public void newTest(){
+        String data1 = "a호한글이잔특";
+        System.out.println(StringHelper.substrb2(data1,3,5));;
+    }
 
     @Test
     public void padding() {
