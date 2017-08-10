@@ -15,7 +15,26 @@ import java.util.regex.Pattern;
  */
 public class LeaningTest {
     String testDataString = "abcde한글이han gul다ykd";
+    @Test
+    public void getDefaultCharsets2() throws UnsupportedEncodingException, CharacterCodingException {
+        String testData = "한글이가득";
 
+        Charset charset = Charset.forName("EUC-KR");
+        ByteBuffer byteBuffer = charset.encode(testData);
+
+        byte[] newone = Arrays.copyOfRange(byteBuffer.array(), 1, 5);
+
+        CharsetDecoder charsetDecoder = charset.newDecoder()
+                .replaceWith("*")
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE);
+
+        CharBuffer charBuffer = charsetDecoder.decode(ByteBuffer.wrap(newone));
+
+        System.out.println(charBuffer.toString());
+
+
+    }
     @Test
     public void getDefaultCharsets() throws UnsupportedEncodingException, CharacterCodingException {
         String testData = "한글이가득";

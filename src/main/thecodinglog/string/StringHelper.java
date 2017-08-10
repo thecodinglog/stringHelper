@@ -8,6 +8,10 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.Arrays;
 
+/**
+ * @author Jeongjin Kim
+ * @since 1.0
+ */
 public class StringHelper {
 
     public static String substrb2(String str, Number beginByte) {
